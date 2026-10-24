@@ -17,6 +17,7 @@
 
 import { Rng } from '../core/rng';
 import {
+  BOSS_TOUCH,
   BOSSES,
   BREAKABLE_HP,
   CATS,
@@ -145,6 +146,8 @@ export interface Boss {
   dy: number;
   /** Pumpkin King's hop. */
   hop: number;
+  /** Seconds she's been crowding Big Boo. */
+  crowded: number;
 }
 
 export interface Cat {
@@ -155,6 +158,8 @@ export interface Cat {
   prevY: number;
   /** 1 facing right, -1 left. */
   fx: number;
+  /** Sideways speed, smoothed, px/s: which way it faces follows this, not every twitch. */
+  vx: number;
   moving: boolean;
   /** Following her, or off showing her something. */
   mode: 'follow' | 'guide';
@@ -261,12 +266,12 @@ export class GameState {
   readonly orbs: Orb[] = [];
   readonly pickups: Pickup[] = [];
   readonly cats: Cat[] = (['Hocus', 'Pocus'] as const).map((name) => ({
-    name, x: 0, y: 0, prevX: 0, prevY: 0, fx: 1, moving: false, mode: 'follow' as const, pose: 'sit' as const,
+    name, x: 0, y: 0, prevX: 0, prevY: 0, fx: 1, vx: 0, moving: false, mode: 'follow' as const, pose: 'sit' as const,
     poseTime: 0, still: 0, meowClock: 0, gx: 0, gy: 0,
   }));
   readonly boss: Boss = {
     kind: null, phase: 'none', x: 0, y: 0, hp: 0, maxHp: 1, t: 0, clock: 0, attack: 0, flash: 0, alpha: 1, vanish: 0,
-    swoop: 'none', swoopT: 0, dx: 0, dy: 0, hop: 0,
+    swoop: 'none', swoopT: 0, dx: 0, dy: 0, hop: 0, crowded: 0,
   };
 
   private rooms = new Map<string, RoomState>();
@@ -363,6 +368,7 @@ export class GameState {
       c.pose = 'walk';
       c.poseTime = 0;
       c.still = 0;
+      c.vx = 0;
       c.meowClock = 1.5;
     });
   }
@@ -433,6 +439,7 @@ export class GameState {
       b.vanish = 0;
       b.swoop = 'none';
       b.hop = 0;
+      b.crowded = 0;
       this.shut = true;
       this.emit('boss-enter', b.x, b.y, b.kind, 0);
     }
@@ -634,7 +641,16 @@ export class GameState {
     this.phase = 'slide';
   }
 
-  /** Auto-aim: the nearest monster in sight, else the nearest thing in the way. */
+  /** Is (x, y) in front of her, within SHOT.cone of where she's facing? */
+  private ahead(x: number, y: number): boolean {
+    const p = this.player;
+    const dx = x - p.x;
+    const dy = y - p.y;
+    const d = Math.hypot(dx, dy) || 1;
+    return (dx * p.fx + dy * p.fy) / d >= SHOT.cone;
+  }
+
+  /** Auto-aim: the nearest monster in front of her, else the nearest thing in the way in front of her. */
   private fire(dt: number): void {
     const p = this.player;
     p.fireClock -= dt;
@@ -645,7 +661,7 @@ export class GameState {
     for (const m of this.monsters) {
       if (!m.alive) continue;
       const d = Math.hypot(m.x - p.x, m.y - p.y);
-      if (d < SHOT.range && d < best && this.clearLine(p.x, p.y, m.x, m.y)) {
+      if (d < SHOT.range && d < best && this.ahead(m.x, m.y) && this.clearLine(p.x, p.y, m.x, m.y)) {
         best = d;
         tx = m.x;
         ty = m.y;
@@ -654,7 +670,7 @@ export class GameState {
     const b = this.boss;
     if (b.phase === 'fight' && b.alpha > 0.5) {
       const d = Math.hypot(b.x - p.x, b.y - p.y);
-      if (d < SHOT.range * 1.3 && d < best && this.clearLine(p.x, p.y, b.x, b.y)) {
+      if (d < SHOT.range * 1.3 && d < best && this.ahead(b.x, b.y) && this.clearLine(p.x, p.y, b.x, b.y)) {
         best = d;
         tx = b.x;
         ty = b.y;
@@ -670,7 +686,7 @@ export class GameState {
           const cx = (c + 0.5) * TILE;
           const cy = (r + 0.5) * TILE;
           const d = Math.hypot(cx - p.x, cy - p.y);
-          if (d < SHOT.obstacleRange && d < best && this.clearLine(p.x, p.y, cx, cy, r * ROOM_COLS + c)) {
+          if (d < SHOT.obstacleRange && d < best && this.ahead(cx, cy) && this.clearLine(p.x, p.y, cx, cy, r * ROOM_COLS + c)) {
             best = d;
             tx = cx;
             ty = cy;
@@ -678,7 +694,16 @@ export class GameState {
         }
       }
     }
-    if (best === Infinity) return;
+    if (best === Infinity) {
+      // Something to boo nearby, but not in front of her: a star straight ahead,
+      // so walking towards a monster always shoots at it.
+      const near =
+        this.monsters.some((m) => m.alive && Math.hypot(m.x - p.x, m.y - p.y) < SHOT.range) ||
+        (b.phase === 'fight' && Math.hypot(b.x - p.x, b.y - p.y) < SHOT.range * 1.3);
+      if (!near || !p.moving) return;
+      tx = p.x + p.fx * SHOT.range;
+      ty = p.y + p.fy * SHOT.range;
+    }
     const s = this.shots.find((o) => !o.alive);
     if (!s) return;
     p.fireClock = SHOT.every;
@@ -689,11 +714,8 @@ export class GameState {
     s.vx = ((tx - p.x) / d) * SHOT.speed;
     s.vy = ((ty - p.y) / d) * SHOT.speed;
     s.life = SHOT.life;
-    // Turn to face what she's shooting, when she's standing still.
-    if (!p.moving) {
-      p.fx = (tx - p.x) / d;
-      p.fy = (ty - p.y) / d;
-    }
+    // She doesn't turn to follow what she's shooting: which way she faces is hers
+    // to choose, or standing still would aim at everything again.
     this.emit('shoot', p.x, p.y, this.character, 0);
   }
 
@@ -924,6 +946,13 @@ export class GameState {
           this.ring(b.x, b.y, angry ? 8 : 6, 'orb');
         }
       } else {
+        // Crowded for too long: off he goes, to pop up somewhere else.
+        b.crowded = d < BOSS_TOUCH.crowd ? b.crowded + dt : 0;
+        if (b.crowded > BOSS_TOUCH.crowdTime && b.phase === 'fight') {
+          b.crowded = 0;
+          b.vanish = 1.1;
+          this.emit('boss-attack', b.x, b.y, 'vanish', 0);
+        }
         b.alpha = Math.min(1, b.alpha + dt * 3);
         this.moveBoss(b, (dx / d) * spec.speed * dt, (dy / d) * spec.speed * dt + Math.sin(b.t * 2) * 12 * dt, spec.r);
       }
@@ -1271,17 +1300,23 @@ export class GameState {
       const dx = tx - c.x;
       const dy = ty - c.y;
       const d = Math.hypot(dx, dy);
-      const arrived = c.mode === 'guide' ? Math.hypot(c.gx - c.x, c.gy - c.y) < 3 : d < 2;
+      // Following, a cat stays put until it's a few px out of place, and slows as
+      // it arrives, rather than darting a px at a time after her. And it turns
+      // round only when it's really heading the other way. Jonathan: while she
+      // walked, the cats looked "blurry", flipping and stop-starting every frame.
+      const arrived = c.mode === 'guide' ? Math.hypot(c.gx - c.x, c.gy - c.y) < 3 : d < (c.moving ? 1 : 6);
       c.moving = !arrived && d > 0.5;
+      const was = c.x;
       if (c.moving) {
-        const move = Math.min(d, speed * dt);
+        const move = Math.min(d, speed * dt, Math.max(30, d * 6) * dt);
         c.x += (dx / d) * move;
         c.y += (dy / d) * move;
-        if (Math.abs(dx) > 0.5) c.fx = dx > 0 ? 1 : -1;
         c.still = 0;
       } else {
         c.still += dt;
       }
+      c.vx += ((c.x - was) / dt - c.vx) * Math.min(1, dt * 8);
+      if (c.vx * c.fx < -25) c.fx = -c.fx;
       if (c.poseTime > 0) return;
       if (c.moving) c.pose = 'walk';
       else if (c.mode === 'guide') {
@@ -1385,7 +1420,7 @@ export class GameState {
     }
     const b = this.boss;
     if (b.phase === 'fight' && b.alpha > 0.5 && Math.hypot(b.x - p.x, b.y - p.y) < BOSSES[b.kind!].r * 0.8 + PLAYER.r) {
-      this.spook(b.x, b.y, b.kind!);
+      this.spook(b.x, b.y, b.kind!, BOSS_TOUCH.knockback);
     }
   }
   private lastLocked = -10;
@@ -1402,15 +1437,15 @@ export class GameState {
   }
 
   /** Something spooky touched her: a heart, a hop backwards, a moment of safety. */
-  private spook(x: number, y: number, by: string): void {
+  private spook(x: number, y: number, by: string, push = 1): void {
     const p = this.player;
     p.hearts -= 1;
     p.safe = PLAYER.safe;
     const dx = p.x - x;
     const dy = p.y - y;
     const d = Math.hypot(dx, dy) || 1;
-    p.kx = (dx / d) * PLAYER.knockback;
-    p.ky = (dy / d) * PLAYER.knockback;
+    p.kx = (dx / d) * PLAYER.knockback * push;
+    p.ky = (dy / d) * PLAYER.knockback * push;
     p.mood = 'spooked';
     p.moodTime = 0.8;
     for (const c of this.cats) {

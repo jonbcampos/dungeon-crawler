@@ -149,3 +149,27 @@ Corner, then 59, 69 and 84 s.
 - **Drawing at the screen's full refresh rate**: `core/loop.ts`, shared by every game in the set,
   now draws at most 60 pictures a second (the simulation still steps 120 times), so a 120Hz phone
   does half the drawing it did.
+
+## 12. Aim by facing; bosses push back; smoother cats (Jonathan's third play)
+
+"Should they only shoot when they are (mainly) facing the direction of the enemy. I was playing
+Big Boo and just being close was enough to kill it. Which means winning is mainly about being
+close."
+
+- **Stars fire only at what's in front of her**: within about 45 degrees either side of the way
+  she's facing (`SHOT.cone`). She no longer turns to follow what she's shooting, or standing still
+  would aim at everything again. With a monster about but none in front of her, stars fly
+  straight ahead, so walking at a monster always shoots it. Leaf piles and cobwebs too: she shoots
+  the ones she's facing.
+- **Bosses push back**: touching one knocks her twice as far as a monster does, and Big Boo won't
+  be crowded: within 70 px for 1.2 s he vanishes and pops up elsewhere. A fight is now a cycle of
+  facing the boss, shooting, stepping out of the way and lining up again.
+- **The bot plays that way too**: it nudges the stick to face a boss, stands and shoots, and steps
+  sideways out of the path of incoming orbs. Bot runs, Candy Corner to Haunted Hill: 17, 108, 88
+  and 115 s, running out of hearts 0, 4, 0 and 2 times (the Pumpkin King is the hard one). Quiet
+  help still adds hearts after each loss.
+- **Hocus and Pocus looked "blurry" while she walked**: following her, a cat moved a pixel,
+  stopped, moved again and turned round, every frame (over 1,000 walk/stop changes in 12 s of
+  walking). Now a cat waits until it's a few pixels out of place, slows as it arrives, and turns
+  round only when it's really heading the other way: about 35 changes in the same walk.
+  `verify()` checks both the aiming and the cats.

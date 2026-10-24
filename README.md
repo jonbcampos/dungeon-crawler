@@ -20,8 +20,9 @@ to open it. If she lingers in a room, both go to the doorway towards what's next
 ## Playing
 
 - **Drag anywhere to walk**: a joystick appears under the finger, centred where it went down.
-- **Shooting is automatic**: at the nearest monster in sight, or, with no monster around, at the
-  nearest thing in the way (a leaf pile, a cobweb, a hay bale, a chest).
+- **Shooting is automatic, at what she's facing**: the nearest monster in front of her, or, with
+  no monster around, the nearest thing in the way in front of her (a leaf pile, a cobweb, a hay
+  bale, a chest). To shoot something, turn towards it.
 - **Monsters** (ghosts, bats, hopping jack-o'-lanterns, and Raccoon Bandits in sheet costumes
   hogging candy) get *boo'd*: they turn happy, pop into candy and float away. Nobody is hurt.
 - **Keys** come from chests. Walk up to a gate with a key and it swings open.

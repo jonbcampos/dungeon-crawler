@@ -144,6 +144,17 @@ export function playStreet(street: Street, kid: (typeof CHARACTERS)[number]['id'
       const dy = gy - s.player.y;
       const d = Math.hypot(dx, dy);
       s.setStick(d > 3 ? dx / d : 0, d > 3 ? dy / d : 0);
+      // She only shoots what's in front of her, so part of every second the bot
+      // turns to the nearest monster (or the boss) and edges towards it.
+      const fight = bossStick(s);
+      const foe = nearestFoe(s);
+      if (fight) s.setStick(fight[0], fight[1]);
+      else if (foe && t % 1 < 0.45) {
+        const fx = foe[0] - s.player.x;
+        const fy = foe[1] - s.player.y;
+        const fd = Math.hypot(fx, fy) || 1;
+        s.setStick((fx / fd) * 0.15, (fy / fd) * 0.15);
+      }
     }
     s.update(dt);
     s.drainEvents((e) => {
@@ -158,6 +169,80 @@ export function playStreet(street: Street, kid: (typeof CHARACTERS)[number]['id'
     if (stuckFor > 120) break;
   }
   return { result: s.phase === 'bowl' ? 'bowl' : `stuck in room ${s.rx},${s.ry}`, t, candy: s.player.candy, losses };
+}
+
+/**
+ * A boss fight, played the way the new aiming asks: step out of the way of
+ * anything close (an orb heading her way, the boss itself), otherwise turn to
+ * face the boss with a nudge of the stick, then stand and shoot, walking in
+ * only if it's far off. Null when there's no fight on.
+ */
+function bossStick(s: GameState): [number, number] | null {
+  const b = s.boss;
+  if (b.phase !== 'fight') return null;
+  const p = s.player;
+  // Danger first: the nearest orb that's coming closer, or the boss on top of her.
+  let ax = 0;
+  let ay = 0;
+  for (const o of s.orbs) {
+    if (!o.alive) continue;
+    const dx = p.x - o.x;
+    const dy = p.y - o.y;
+    const d = Math.hypot(dx, dy);
+    if (d > 60 || dx * o.vx + dy * o.vy <= 0) continue;
+    // Sideways to its path, whichever side she's already on.
+    const side = Math.sign(dx * -o.vy + dy * o.vx) || 1;
+    ax += (-o.vy * side) / (d + 1);
+    ay += (o.vx * side) / (d + 1);
+  }
+  for (const m of s.monsters) {
+    if (!m.alive) continue;
+    const dx = p.x - m.x;
+    const dy = p.y - m.y;
+    const d = Math.hypot(dx, dy);
+    if (d < 40) {
+      ax += (dx / (d + 1)) * 60;
+      ay += (dy / (d + 1)) * 60;
+    }
+  }
+  const bdx = p.x - b.x;
+  const bdy = p.y - b.y;
+  const bd = Math.hypot(bdx, bdy) || 1;
+  if (bd < 75 || b.swoop !== 'none') {
+    ax += (bdx / bd) * 3;
+    ay += (bdy / bd) * 3;
+  }
+  // Keep off the walls: a dodge into a corner is no dodge.
+  const cx = ROOM_W / 2 - p.x;
+  const cy = ROOM_H / 2 - p.y;
+  const a = Math.hypot(ax, ay);
+  if (a > 0.001) {
+    const k = Math.hypot(cx, cy) > 120 ? 0.4 / Math.hypot(cx, cy) : 0;
+    return [ax / a + cx * k, ay / a + cy * k];
+  }
+  // Safe: face the boss, then stand and shoot.
+  const facing = (-bdx * p.fx + -bdy * p.fy) / bd;
+  if (facing < 0.9) return [(-bdx / bd) * 0.05, (-bdy / bd) * 0.05];
+  if (bd > 140) return [-bdx / bd, -bdy / bd];
+  return [0, 0];
+}
+
+/** The nearest monster or boss worth turning to, or null. */
+function nearestFoe(s: GameState): [number, number] | null {
+  const p = s.player;
+  let best: [number, number] | null = null;
+  let bestD = 200;
+  for (const m of s.monsters) {
+    if (!m.alive) continue;
+    const d = Math.hypot(m.x - p.x, m.y - p.y);
+    if (d < bestD) {
+      bestD = d;
+      best = [m.x, m.y];
+    }
+  }
+  const b = s.boss;
+  if (b.phase === 'fight' && b.alpha > 0.5 && Math.hypot(b.x - p.x, b.y - p.y) < 240) return [b.x, b.y];
+  return best;
 }
 
 /** Where the bot wants to walk to next, in room pixels. */
@@ -442,6 +527,46 @@ export function verify(full = true): Result[] {
     const atDoor = s.cats.every((c) => c.x > ROOM_W - 2 * TILE);
     add('stood still, the cats go to the way on and meow', !!nudged && atDoor && meows >= 2,
       `thought of the ${nudged || 'nothing'}; cats at x ${s.cats.map((c) => c.x.toFixed(0)).join(', ')}; ${meows} meows`);
+  }
+
+  // She shoots what's in front of her, not what's behind her. (Facing away with
+  // a monster about, stars fly straight ahead, away from it: they mustn't hit.)
+  {
+    const s = new GameState();
+    s.load(first, 'ellie');
+    s.begin();
+    s.invincible = true;
+    const ghost = s.monsters.find((m) => m.alive)!;
+    const full = ghost.hp;
+    s.player.x = ghost.x - 60; // the ghost is to her right...
+    s.setStick(-0.02, 0); // ...and she's facing left
+    for (let t = 0; t < 1.5; t += 1 / 120) s.update(1 / 120);
+    const behind = ghost.alive ? full - ghost.hp : full;
+    s.setStick(0.02, 0); // turn round
+    for (let t = 0; t < 1.5; t += 1 / 120) s.update(1 / 120);
+    const ahead = ghost.alive ? full - ghost.hp : full;
+    add('she shoots what she faces, not what is behind her', behind === 0 && ahead > 0, `facing away: ${behind} hits; facing it: ${ahead}`);
+  }
+
+  // Hocus and Pocus trot after her smoothly: no flipping or stop-starting every frame.
+  {
+    const s = new GameState();
+    s.load(STREETS[1]!, 'ellie');
+    s.begin();
+    s.invincible = true;
+    let changes = 0;
+    const last = s.cats.map((c) => `${c.fx}${c.moving}`);
+    for (let t = 0; t < 12; t += 1 / 120) {
+      const a = t * 1.3;
+      s.setStick(t < 6 ? Math.cos(a) : t < 9 ? 1 : -0.4, t < 6 ? Math.sin(a) : t < 9 ? 0.2 : -0.3);
+      s.update(1 / 120);
+      s.drainEvents(() => {});
+      s.cats.forEach((c, i) => {
+        if (`${c.fx}${c.moving}` !== last[i]) changes++;
+        last[i] = `${c.fx}${c.moving}`;
+      });
+    }
+    add('the cats follow smoothly', changes < 80, `${changes} turns or stop-starts in 12 s of walking (was over 1000)`);
   }
 
   if (full) {

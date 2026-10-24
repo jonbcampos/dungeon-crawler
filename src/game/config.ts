@@ -71,11 +71,20 @@ export const STICK = { dead: 6, full: 30, drawR: 30 };
 
 /**
  * Shots fire by themselves. Five-year-olds can drag OR press a button, rarely
- * both at once, so the game aims: at the nearest monster she can see within
+ * both at once, so the game aims: at the nearest monster in front of her within
  * `range`, else at the nearest thing in the way (a leaf pile, a cobweb, a
  * chest) within `obstacleRange`. With nothing to shoot, nothing fires.
  */
 export const SHOT = {
+  /**
+   * She only shoots at what's in front of her: within this cosine of where
+   * she's facing (0.5 is 60 degrees either side). Jonathan, after Big Boo: "just
+   * being close was enough to kill it", because the auto-aim fired all round
+   * her. Now she has to turn to it, and turning is walking towards it. 0.7 is
+   * about 45 degrees either side. With a monster about but none in front of
+   * her, stars still fly straight ahead, so walking at one always shoots it.
+   */
+  cone: 0.7,
   every: 0.3,
   speed: 250,
   range: 165,
@@ -153,6 +162,13 @@ export const BOSSES: Record<BossKind, BossSpec> = {
   /** A Raccoon Bandit dressed as a vampire, guarding the candy bowl. Swoops and sends bats. */
   raccula: { name: 'Count Raccula', hp: 44, r: 20, size: 62, every: 1.9, speed: 60, candy: 30 },
 };
+
+/**
+ * Bosses push back. Touching one knocks her this many times further than a
+ * monster does. And Big Boo won't be crowded: within `crowd` px for `crowdTime`
+ * seconds, he vanishes and pops up somewhere else.
+ */
+export const BOSS_TOUCH = { knockback: 2, crowd: 70, crowdTime: 1.2 };
 
 /** Boss projectiles: big, slow, bright. */
 export const ORB = { speed: 80, r: 6, drawR: 8, life: 5 };
