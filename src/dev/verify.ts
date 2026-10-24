@@ -548,6 +548,22 @@ export function verify(full = true): Result[] {
     add('she shoots what she faces, not what is behind her', behind === 0 && ahead > 0, `facing away: ${behind} hits; facing it: ${ahead}`);
   }
 
+  // Pocus shows her a key by sitting beside it, not on top of it.
+  {
+    const s = new GameState();
+    s.load(first, 'ellie');
+    s.begin();
+    s.invincible = true;
+    (s as unknown as { enterRoom(x: number, y: number): void }).enterRoom(1, 0);
+    s.player.x = 1.5 * TILE;
+    s.player.y = 4.5 * TILE;
+    for (let t = 0; t < 4; t += 1 / 120) s.update(1 / 120);
+    const pocus = s.cats.find((c) => c.name === 'Pocus')!;
+    const key = s.grid.flatMap((row, r) => row.map((t, c) => (t === 'k' ? [(c + 0.5) * TILE, (r + 0.5) * TILE] : null))).find(Boolean)!;
+    const d = Math.hypot(pocus.x - key[0]!, pocus.y - key[1]!);
+    add('Pocus sits beside a key, not on it', pocus.mode === 'guide' && d > TILE * 0.6 && d < TILE * 1.6, `${d.toFixed(0)} px from the key`);
+  }
+
   // Hocus and Pocus trot after her smoothly: no flipping or stop-starting every frame.
   {
     const s = new GameState();

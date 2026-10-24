@@ -173,3 +173,9 @@ close."
   walking). Now a cat waits until it's a few pixels out of place, slows as it arrives, and turns
   round only when it's really heading the other way: about 35 changes in the same walk.
   `verify()` checks both the aiming and the cats.
+
+## 13. Pocus sits beside a key, not on it
+
+"Pocus goes to a key, which is great, but then is sitting on top of it. Would be better if he
+went to sit next to the item." He now sits on the open tile beside a key (the side nearest her),
+or beside a key that's just popped out of a chest, so the key stays in plain sight.

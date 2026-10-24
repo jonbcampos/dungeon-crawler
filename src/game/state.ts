@@ -1121,8 +1121,8 @@ export class GameState {
     for (let r = 0; r < ROOM_ROWS; r++) {
       for (let c = 0; c < ROOM_COLS; c++) {
         if (!wants(grid[r]![c]!)) continue;
-        // A key on the ground is its own spot; anything solid, the open tile beside it.
-        const spots: [number, number][] = grid[r]![c] === 'k' ? [[c, r]] : [[c - 1, r], [c + 1, r], [c, r - 1], [c, r + 1]];
+        // The open tile beside it nearest her, never on it: a cat sitting on a key hides it.
+        const spots: [number, number][] = [[c - 1, r], [c + 1, r], [c, r + 1], [c, r - 1]];
         for (const [sc, sr] of spots) {
           const t = grid[sr]?.[sc];
           if (t === undefined || SOLID.has(t)) continue;
@@ -1136,7 +1136,16 @@ export class GameState {
         }
       }
     }
-    if (cat.name === 'Pocus') for (const k of this.pickups) if (k.alive && k.kind === 'key') return [k.x, k.y];
+    if (cat.name === 'Pocus') {
+      // A key that's just popped out of a chest: sit beside it, on whichever side is open.
+      for (const k of this.pickups) {
+        if (!k.alive || k.kind !== 'key') continue;
+        for (const [ox, oy] of [[-18, 0], [18, 0], [0, 18], [0, -18]] as const) {
+          if (!this.blocked(k.x + ox, k.y + oy, 4)) return [k.x + ox, k.y + oy];
+        }
+        return [k.x, k.y];
+      }
+    }
     return best;
   }
 
