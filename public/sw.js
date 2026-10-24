@@ -23,7 +23,7 @@
  * the version is the only lever that reaches a phone with the game already on
  * its home screen. Bump it after anything that could have been cached wrong.
  */
-const VERSION = 'v5';
+const VERSION = 'v6';
 const CACHE = `trick-or-treat-${VERSION}`;
 
 // The shell has stable, known names, so it can be cached up front.
@@ -58,15 +58,20 @@ async function everyAsset() {
   return urls;
 }
 
+// Installing fetches with `cache: 'reload'`, past the browser's own HTTP cache:
+// GitHub Pages lets a file sit there for ten minutes, so a new version
+// installed soon after a deploy could otherwise save the OLD sounds and
+// pictures (which keep their names) into its fresh cache. That happened with
+// Trick or Treat's new music.
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches
       .open(CACHE)
       // Individually, so one failed entry doesn't abort the whole install.
       .then(async (cache) => {
-        await Promise.allSettled(SHELL.map((url) => cache.add(url)));
+        await Promise.allSettled(SHELL.map((url) => cache.add(new Request(url, { cache: 'reload' }))));
         const assets = await everyAsset();
-        await Promise.allSettled(assets.map((url) => cache.add(url)));
+        await Promise.allSettled(assets.map((url) => cache.add(new Request(url, { cache: 'reload' }))));
       })
       .then(() => self.skipWaiting()),
   );
@@ -88,7 +93,12 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  if (request.mode === 'navigate') {
+  // Only the game's own page is kept as the offline copy of index.html.
+  // Opening a sound or picture straight from its link is a navigation too, and
+  // used to be saved as index.html, so the next offline launch got a music file.
+  const isPage = request.mode === 'navigate' && (url.pathname.endsWith('/') || url.pathname.endsWith('/index.html'));
+  if (request.mode === 'navigate' && !isPage) return;
+  if (isPage) {
     event.respondWith(
       fetch(request)
         .then((response) => {
