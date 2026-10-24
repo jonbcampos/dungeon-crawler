@@ -188,3 +188,11 @@ key from haunted-house sounds: a music-box melody over pipe organ and theremin o
 sneaky spooky-surf-guitar groove with harpsichord and "rattling bones" woodblock for the streets,
 and driving spooky surf-rock with organ stabs for the bosses. Each prompt also says outright: not
 circus, not carnival, no tuba, no oom-pah.
+
+## 15. Slower, moodier music (take A)
+
+The surf-rock round was "still too upbeat". The prompts now ask for slow, minor-key, atmospheric
+music with no drum kit, guitar or brass: a music box over tremolo strings, harp and a distant bell
+for the title (78 bpm); tiptoeing pizzicato bass, harpsichord and theremin sighs for the streets
+(84 bpm); a low string ostinato, timpani and dark organ for the bosses (120 bpm). Two takes of
+each were generated and compared side by side; Jonathan picked take A for all three.
