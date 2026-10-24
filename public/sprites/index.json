@@ -1,0 +1,139 @@
+{
+  "generated": [
+    "ellie.motion",
+    "afton.motion",
+    "jacob.motion",
+    "hocus.motion",
+    "pocus.motion",
+    "monsters.motion",
+    "props.motion",
+    "trees.motion",
+    "yard.motion",
+    "indoor.motion",
+    "items.motion",
+    "boss.pumpkin-king",
+    "boss.big-boo",
+    "boss.raccula",
+    "boom.motion",
+    "title",
+    "night"
+  ],
+  "ext": "jpg",
+  "opaque": [
+    "title",
+    "night"
+  ],
+  "additive": [
+    "boom.motion"
+  ],
+  "sheets": {
+    "ellie.motion": {
+      "cols": 4,
+      "rows": 2,
+      "align": "floor",
+      "rowIds": [
+        "walk",
+        "poses"
+      ]
+    },
+    "afton.motion": {
+      "cols": 4,
+      "rows": 2,
+      "align": "floor",
+      "rowIds": [
+        "walk",
+        "poses"
+      ]
+    },
+    "jacob.motion": {
+      "cols": 4,
+      "rows": 2,
+      "align": "floor",
+      "rowIds": [
+        "walk",
+        "poses"
+      ]
+    },
+    "hocus.motion": {
+      "cols": 4,
+      "rows": 2,
+      "align": "floor",
+      "rowIds": [
+        "walk",
+        "poses"
+      ]
+    },
+    "pocus.motion": {
+      "cols": 4,
+      "rows": 2,
+      "align": "floor",
+      "rowIds": [
+        "walk",
+        "poses"
+      ]
+    },
+    "monsters.motion": {
+      "cols": 4,
+      "rows": 2,
+      "align": "center",
+      "rowIds": [
+        "normal",
+        "happy"
+      ]
+    },
+    "props.motion": {
+      "cols": 4,
+      "rows": 2,
+      "align": "center",
+      "rowIds": [
+        "all",
+        "all"
+      ]
+    },
+    "trees.motion": {
+      "cols": 4,
+      "rows": 2,
+      "align": "floor",
+      "rowIds": [
+        "all",
+        "all"
+      ]
+    },
+    "yard.motion": {
+      "cols": 4,
+      "rows": 2,
+      "align": "floor",
+      "rowIds": [
+        "all",
+        "all"
+      ]
+    },
+    "indoor.motion": {
+      "cols": 4,
+      "rows": 2,
+      "align": "floor",
+      "rowIds": [
+        "all",
+        "all"
+      ]
+    },
+    "items.motion": {
+      "cols": 4,
+      "rows": 2,
+      "align": "center",
+      "rowIds": [
+        "all",
+        "all"
+      ]
+    },
+    "boom.motion": {
+      "cols": 4,
+      "rows": 2,
+      "align": "center",
+      "rowIds": [
+        "fx",
+        "fx"
+      ]
+    }
+  }
+}
