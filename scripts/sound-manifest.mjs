@@ -9,7 +9,7 @@
  *
  * Each kid has the same lines with their own prefix (`e.*`, `a.*`, `j.*`) and
  * their own voice. All three are TTS for now. Ellie's real recordings can drop
- * in later (set `recorded: true` on ELLIE), and if Afton and Jacob want to
+ * in later (set `recorded: true` on ELLIE), and if Aften and Jacob want to
  * record theirs on the way over, so can theirs.
  */
 
@@ -21,7 +21,7 @@ const ELLIE = {
     'and bouncy, innocent and goofy. NOT grown-up, NOT breathy: a loud happy little kid',
 };
 
-const AFTON = {
+const AFTEN = {
   voice: 'Leda',
   rate: 1.05,
   profile:
@@ -95,7 +95,7 @@ function kid(prefix, who) {
 
 export const SOUNDS = [
   ...kid('e', ELLIE),
-  ...kid('a', AFTON),
+  ...kid('a', AFTEN),
   ...kid('j', JACOB),
 
   // --- The monsters ------------------------------------------------------------------

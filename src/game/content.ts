@@ -2,16 +2,17 @@
  * The three trick-or-treaters. They play exactly the same; only the costume,
  * the voice and what they shoot change.
  *
- * Afton's and Jacob's costumes are PLACEHOLDERS until their parents say what
- * they're dressing up as. Swapping one in is this table (name, costume, shot,
+ * Aften is going as Rumi, the K-pop demon hunter (told 2026-10-24; the name was
+ * first spelled "Afton", and saves from then are carried over in save.ts).
+ * Jacob's costume is a PLACEHOLDER until his parents say what he's dressing up as. Swapping one in is this table (name, costume, shot,
  * colours), the matching prompt in scripts/art-manifest.mjs, and a re-run of
  * `npm run art -- --only=<id>.motion` for their sprite sheet.
  */
 
-export type CharacterId = 'ellie' | 'afton' | 'jacob';
+export type CharacterId = 'ellie' | 'aften' | 'jacob';
 
 /** What a character's shot looks like. Every shot behaves the same. */
-export type ShotLook = 'star' | 'sparkle' | 'bolt';
+export type ShotLook = 'star' | 'note' | 'bolt';
 
 export interface Character {
   id: CharacterId;
@@ -44,15 +45,15 @@ export const CHARACTERS: readonly Character[] = [
     voice: 'e',
   },
   {
-    id: 'afton',
-    name: 'Afton',
-    // Placeholder until Afton's costume is known.
-    costume: 'Good Witch',
-    shot: 'sparkle',
-    shotColor: '#ffd6f5',
-    shotGlow: '#e879f9',
-    outfit: '#8b5cf6',
-    hair: '#8a5a2b',
+    id: 'aften',
+    name: 'Aften',
+    costume: 'Demon Hunter',
+    // The demon hunters fight with their singing, so: glowing music notes.
+    shot: 'note',
+    shotColor: '#f5e8ff',
+    shotGlow: '#a855f7',
+    outfit: '#231634',
+    hair: '#7c3aed',
     skin: '#f1c9a5',
     voice: 'a',
   },

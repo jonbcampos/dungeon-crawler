@@ -43,7 +43,9 @@ export function loadSave(): Save {
     if (!raw) return freshSave();
     const data = JSON.parse(raw) as Partial<Save>;
     if (data.v !== VERSION) return freshSave();
-    const character: CharacterId = data.character === 'afton' || data.character === 'jacob' ? data.character : 'ellie';
+    // 'afton' was Aften's id before the spelling was fixed.
+    const picked = (data.character as string) === 'afton' ? 'aften' : data.character;
+    const character: CharacterId = picked === 'aften' || picked === 'jacob' ? picked : 'ellie';
     return {
       v: VERSION,
       candy: counts(data.candy, 9999),

@@ -196,3 +196,12 @@ music with no drum kit, guitar or brass: a music box over tremolo strings, harp 
 for the title (78 bpm); tiptoeing pizzicato bass, harpsichord and theremin sighs for the streets
 (84 bpm); a low string ostinato, timpani and dark organ for the bosses (120 bpm). Two takes of
 each were generated and compared side by side; Jonathan picked take A for all three.
+
+## 16. Aften is Rumi
+
+"Aften (I misspelled earlier) is going as Rumi from demon hunters." The name is fixed everywhere,
+including her id (`aften`); a save that picked her under the old spelling still picks her. Her
+sheet is repainted from a description, as decision 7 asks: a K-pop idol demon hunter with a long
+purple braid, a sparkly black cropped jacket over a purple top, black trousers with glowing purple
+markings, and a glowing purple sword. She shoots glowing purple music notes, because the demon
+hunters fight with their singing. Jacob is still a placeholder.

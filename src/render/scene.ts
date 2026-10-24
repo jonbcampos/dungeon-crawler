@@ -817,18 +817,19 @@ function drawShot(ctx: CanvasRenderingContext2D, ch: Character, x: number, y: nu
   if (ch.shot === 'star') {
     ctx.rotate(time * 10);
     drawStar(ctx, 0, 0, 6, ch.shotColor);
-  } else if (ch.shot === 'sparkle') {
-    ctx.rotate(time * 6);
+  } else if (ch.shot === 'note') {
+    // A glowing eighth note, upright, rocking as it flies.
+    ctx.rotate(Math.sin(time * 12 + x * 0.05) * 0.35);
     ctx.fillStyle = ch.shotColor;
-    for (let i = 0; i < 4; i++) {
-      ctx.rotate(Math.PI / 2);
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.lineTo(1.6, 2);
-      ctx.lineTo(0, 7);
-      ctx.lineTo(-1.6, 2);
-      ctx.fill();
-    }
+    ctx.beginPath();
+    ctx.ellipse(-2, 3, 3.4, 2.5, -0.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillRect(0.6, -6, 1.6, 9);
+    ctx.beginPath();
+    ctx.moveTo(2.2, -6);
+    ctx.quadraticCurveTo(6.5, -3.5, 4.5, 1);
+    ctx.quadraticCurveTo(4.8, -2.5, 2.2, -3);
+    ctx.fill();
   } else {
     ctx.rotate(Math.atan2(vy, vx));
     ctx.fillStyle = ch.shotColor;

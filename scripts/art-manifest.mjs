@@ -14,10 +14,10 @@
  * Costumes are described, never named: "a pale aqua star princess" rather than
  * any character's name, which image models refuse or draw off-model.
  *
- * AFTON AND JACOB ARE PLACEHOLDERS until their parents say what they're
+ * JACOB IS A PLACEHOLDER until his parents say what he's
  * dressing up as. To swap one: change their LOOK and COSTUME below (and the
  * matching entry in src/game/content.ts), then
- *     npm run art -- --only=afton.motion --force
+ *     npm run art -- --only=jacob.motion --force
  */
 
 // --- Shared prompt parts -----------------------------------------------------
@@ -88,12 +88,17 @@ const ELLIE_COSTUME =
   'flowing skirt and a pale yellow star on the front, a small silver crown with light blue gems, ' +
   'little star earrings, and a silver wand topped with a glowing yellow star';
 
-/** PLACEHOLDER until Afton's costume is known. */
-const AFTON_LOOK = 'a little girl about six years old, shoulder-length light brown hair, fair skin, a big smile';
-const AFTON_COSTUME =
-  'dressed up for Halloween as a good witch: a purple dress with little silver stars, a tall pointy ' +
-  'purple witch hat with a silver star band, striped purple-and-black stockings, and a little wand ' +
-  'that sparkles pink at the tip';
+/**
+ * Aften is going as Rumi, the K-pop demon hunter. Described, never named (see
+ * DECISIONS 7): her long purple braid, a sparkly black-and-purple stage outfit,
+ * the glowing purple markings, and her glowing sword.
+ */
+const AFTEN_LOOK = 'a little girl about six years old, fair skin, a big confident smile';
+const AFTEN_COSTUME =
+  'dressed up for Halloween as a K-pop idol demon hunter: very long purple hair in one thick braid ' +
+  'hanging down her back, a sparkly black cropped jacket with purple trim over a purple top, black ' +
+  'trousers with glowing purple swirling markings, black boots, and a glowing purple sword held ' +
+  'proudly in one hand'
 
 /** PLACEHOLDER until Jacob's costume is known. */
 const JACOB_LOOK = 'a little boy about six years old, short dark brown hair, light tan skin, a big grin';
@@ -182,7 +187,7 @@ function catSheet(id, collar) {
 
 export const PIECES = [
   kidSheet('ellie', ELLIE_LOOK, ELLIE_COSTUME),
-  kidSheet('afton', AFTON_LOOK, AFTON_COSTUME),
+  kidSheet('aften', AFTEN_LOOK, AFTEN_COSTUME),
   kidSheet('jacob', JACOB_LOOK, JACOB_COSTUME),
 
   // --- Hocus and Pocus ------------------------------------------------------------------

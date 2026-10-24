@@ -1,7 +1,7 @@
 {
   "generated": [
     "ellie.motion",
-    "afton.motion",
+    "aften.motion",
     "jacob.motion",
     "hocus.motion",
     "pocus.motion",
@@ -36,7 +36,7 @@
         "poses"
       ]
     },
-    "afton.motion": {
+    "aften.motion": {
       "cols": 4,
       "rows": 2,
       "align": "floor",
