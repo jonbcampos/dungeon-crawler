@@ -114,32 +114,42 @@ export const SOUNDS = [
 
   // --- Music (Lyria) ---------------------------------------------------------------------
   {
+    // Jonathan, 2026-10-24: the first set had "a fun circus vibe. When we want a fun
+    // Halloween vibe". Tuba, bassoon, pizzicato and xylophone were the circus; these
+    // are minor-key, haunted-house sounds (organ, theremin, music box, spooky surf
+    // guitar), still playful, and say outright what to avoid.
     id: 'music.title',
     kind: 'music',
     prompt:
-      "A cheerful, cosy-spooky Halloween title theme for a children's cartoon game about kids going " +
-      'trick-or-treating: plucky pizzicato strings, a bouncy bassoon, a little spooky theremin melody ' +
-      'that is playful not scary, celesta sparkles, light finger snaps, 100 bpm. Steady the whole way ' +
+      "A spooky-fun Halloween title theme for a children's cartoon game about kids trick-or-treating " +
+      'on a moonlit autumn night. Minor key. A twinkly music-box celesta melody over soft haunted-house ' +
+      'pipe organ chords, a gentle theremin answering the melody, a deep plucked upright bass, soft ' +
+      'tom drums. Whimsical and cosy-creepy, like a friendly haunted house, playful never scary, 96 bpm. ' +
+      'NOT circus, NOT carnival: no tuba, no oom-pah, no march, no calliope. Steady the whole way ' +
       'through: no long intro, no ending, no fade-out. Instrumental, no vocals.',
   },
   {
     id: 'music.street',
     kind: 'music',
     prompt:
-      "Bouncy, playful exploring music for a children's Halloween adventure game, walking through a " +
-      'neighbourhood at night: a walking bassline on tuba, xylophone skeleton-dance melody, spooky-fun ' +
-      'organ chords, light brushed drums, mischievous and happy, 112 bpm. Gentle enough to play under ' +
-      'sound effects. A steady groove the whole way through: no intro, no build-up, no ending and no ' +
-      'fade-out, so it can loop. Instrumental, no vocals.',
+      "Sneaky, tiptoeing exploring music for a children's Halloween adventure game, creeping through " +
+      'a spooky neighbourhood at night. Minor key. A twangy reverb-drenched spooky surf guitar riff, ' +
+      'walking upright bass, harpsichord, little theremin swoops, light swung drums with brushes and ' +
+      'a hollow woodblock like rattling bones. Mischievous and fun, a classic monster-party Halloween ' +
+      'feel, 108 bpm. Gentle enough to play under sound effects. NOT circus, NOT carnival: no tuba, ' +
+      'no oom-pah, no xylophone, no calliope. A steady groove the whole way through: no intro, no ' +
+      'build-up, no ending and no fade-out, so it can loop. Instrumental, no vocals.',
   },
   {
     id: 'music.boss',
     kind: 'music',
     prompt:
-      "Exciting, silly boss-battle music for a children's Halloween cartoon game against a pompous " +
-      'pumpkin king: dramatic pipe organ stabs, galloping tuba, bright brass, pounding toms and a ' +
-      'cheeky xylophone, goofy and never scary, 136 bpm. A steady groove the whole way through: no ' +
-      'intro, no ending and no fade-out, so it can loop. Instrumental, no vocals.',
+      "Exciting spooky boss-battle music for a children's Halloween cartoon game: a monster showdown " +
+      'in a haunted yard. Minor key, driving spooky surf-rock: fast reverb guitar, rumbling toms, ' +
+      'dramatic haunted pipe organ stabs, wailing theremin, thunderous low strings. Thrilling and ' +
+      'full of energy but never truly scary, 140 bpm. NOT circus, NOT carnival: no tuba, no oom-pah, ' +
+      'no xylophone. A steady groove the whole way through: no intro, no ending and no fade-out, so ' +
+      'it can loop. Instrumental, no vocals.',
   },
 ];
 

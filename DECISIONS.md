@@ -179,3 +179,12 @@ close."
 "Pocus goes to a key, which is great, but then is sitting on top of it. Would be better if he
 went to sit next to the item." He now sits on the open tile beside a key (the side nearest her),
 or beside a key that's just popped out of a chest, so the key stays in plain sight.
+
+## 14. Halloween music, not circus music
+
+"It has a fun circus vibe. When we want a fun Halloween vibe." The first prompts asked for tuba,
+bassoon, pizzicato and xylophone, which is the circus. The three tracks are regenerated in a minor
+key from haunted-house sounds: a music-box melody over pipe organ and theremin on the title, a
+sneaky spooky-surf-guitar groove with harpsichord and "rattling bones" woodblock for the streets,
+and driving spooky surf-rock with organ stabs for the bosses. Each prompt also says outright: not
+circus, not carnival, no tuba, no oom-pah.
