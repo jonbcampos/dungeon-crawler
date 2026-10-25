@@ -205,3 +205,11 @@ sheet is repainted from a description, as decision 7 asks: a K-pop idol demon hu
 purple braid, a sparkly black cropped jacket over a purple top, black trousers with glowing purple
 markings, and a glowing purple sword. She shoots glowing purple music notes, because the demon
 hunters fight with their singing. Jacob is still a placeholder.
+
+## 17. Jacob is a firefighter
+
+"Jacob will be a firefighter. The look is mainly black with the yellow stripes." His sheet is
+repainted: a black firefighter coat and trousers with yellow reflective stripes, a black helmet with
+a gold badge, black boots and a red hose. He sprays splashes of water. With this, no costume is a
+placeholder any more. The first paint had five figures in the bottom row (the slicer needs four);
+the second was right.

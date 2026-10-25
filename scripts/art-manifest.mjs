@@ -14,10 +14,9 @@
  * Costumes are described, never named: "a pale aqua star princess" rather than
  * any character's name, which image models refuse or draw off-model.
  *
- * JACOB IS A PLACEHOLDER until his parents say what he's
- * dressing up as. To swap one: change their LOOK and COSTUME below (and the
+ * To change a costume: change the kid's LOOK and COSTUME below (and the
  * matching entry in src/game/content.ts), then
- *     npm run art -- --only=jacob.motion --force
+ *     npm run art -- --only=<id>.motion --force
  */
 
 // --- Shared prompt parts -----------------------------------------------------
@@ -100,11 +99,13 @@ const AFTEN_COSTUME =
   'trousers with glowing purple swirling markings, black boots, and a glowing purple sword held ' +
   'proudly in one hand'
 
-/** PLACEHOLDER until Jacob's costume is known. */
+/** Jacob is going as a firefighter: "mainly black with the yellow stripes". */
 const JACOB_LOOK = 'a little boy about six years old, short dark brown hair, light tan skin, a big grin';
 const JACOB_COSTUME =
-  'dressed up for Halloween as a superhero: a bright blue suit, a flowing red cape, a small blue ' +
-  'eye mask, red boots, and a yellow lightning bolt on the chest';
+  'dressed up for Halloween as a firefighter: a black firefighter coat and black trousers with ' +
+  'bright yellow reflective stripes around the arms, the chest and the legs, a black fire helmet ' +
+  'with a shiny gold badge on the front, black boots, and a short red fire hose with a silver ' +
+  'nozzle held in one hand'
 
 /**
  * Written as plain descriptions, not labels. The first version started each

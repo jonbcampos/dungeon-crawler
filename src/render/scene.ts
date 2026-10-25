@@ -831,16 +831,20 @@ function drawShot(ctx: CanvasRenderingContext2D, ch: Character, x: number, y: nu
     ctx.quadraticCurveTo(4.8, -2.5, 2.2, -3);
     ctx.fill();
   } else {
+    // A splash of water from the hose: a drop pointing the way it flies, with
+    // two little droplets trailing behind.
     ctx.rotate(Math.atan2(vy, vx));
+    ctx.fillStyle = ch.shotGlow;
+    ctx.beginPath();
+    ctx.arc(-8, -2.5, 1.6, 0, Math.PI * 2);
+    ctx.arc(-11, 2, 1.2, 0, Math.PI * 2);
+    ctx.fill();
     ctx.fillStyle = ch.shotColor;
     ctx.beginPath();
     ctx.moveTo(7, 0);
-    ctx.lineTo(-1, -4);
-    ctx.lineTo(1, -1);
-    ctx.lineTo(-7, 0);
-    ctx.lineTo(1, 4);
-    ctx.lineTo(-1, 1);
-    ctx.closePath();
+    ctx.quadraticCurveTo(0, -4.5, -3.5, 0);
+    ctx.quadraticCurveTo(0, 4.5, 7, 0);
+    ctx.arc(-1, 0, 3.6, 0, Math.PI * 2);
     ctx.fill();
   }
   ctx.restore();

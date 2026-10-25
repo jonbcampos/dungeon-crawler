@@ -4,7 +4,7 @@
  *
  * Aften is going as Rumi, the K-pop demon hunter (told 2026-10-24; the name was
  * first spelled "Afton", and saves from then are carried over in save.ts).
- * Jacob's costume is a PLACEHOLDER until his parents say what he's dressing up as. Swapping one in is this table (name, costume, shot,
+ * Jacob is going as a firefighter (told 2026-10-25): mainly black, yellow stripes. Swapping one in is this table (name, costume, shot,
  * colours), the matching prompt in scripts/art-manifest.mjs, and a re-run of
  * `npm run art -- --only=<id>.motion` for their sprite sheet.
  */
@@ -12,7 +12,7 @@
 export type CharacterId = 'ellie' | 'aften' | 'jacob';
 
 /** What a character's shot looks like. Every shot behaves the same. */
-export type ShotLook = 'star' | 'note' | 'bolt';
+export type ShotLook = 'star' | 'note' | 'water';
 
 export interface Character {
   id: CharacterId;
@@ -60,12 +60,12 @@ export const CHARACTERS: readonly Character[] = [
   {
     id: 'jacob',
     name: 'Jacob',
-    // Placeholder until Jacob's costume is known.
-    costume: 'Superhero',
-    shot: 'bolt',
-    shotColor: '#dbeafe',
-    shotGlow: '#3b82f6',
-    outfit: '#2563eb',
+    costume: 'Firefighter',
+    // A firefighter's hose: splashes of water.
+    shot: 'water',
+    shotColor: '#e6f7ff',
+    shotGlow: '#38bdf8',
+    outfit: '#1b1b1f',
     hair: '#3b2a1a',
     skin: '#e0b48c',
     voice: 'j',

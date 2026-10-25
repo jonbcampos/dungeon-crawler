@@ -8,10 +8,9 @@ candy, find the keys, open the gates, and reach the candy bowl at the end of eac
 | --- | --- | --- |
 | **Ellie** | Star Princess | stars |
 | **Aften** | Demon Hunter (Rumi) | music notes |
-| **Jacob** | Superhero *(placeholder)* | lightning bolts |
+| **Jacob** | Firefighter | splashes of water |
 
-They all play the same. Jacob's costume is a placeholder until his parents say what he's
-dressing up as (see "Changing a costume" below).
+They all play the same. To change a costume, see "Changing a costume" below.
 
 **Hocus and Pocus**, two black cats, come along on every street. They can't be hurt and they
 help: Pocus runs to the key and meows by it, and Hocus leads the way to a gate once there's a key
@@ -58,7 +57,7 @@ to make installed copies fetch a new build.
 
 1. `src/game/content.ts`: the kid's `costume`, `shot` and colours.
 2. `scripts/art-manifest.mjs`: their `*_LOOK` and `*_COSTUME` text.
-3. `npm run art -- --only=jacob.motion --force && npm run art:shrink`
+3. `npm run art -- --only=<id>.motion --force && npm run art:shrink`
 
 ## Art and sound
 
