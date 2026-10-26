@@ -57,6 +57,8 @@ export const MONSTER_FRAMES: Record<MonsterKind, number> = { ghost: 0, bat: 1, p
 
 /** Props sheet cells. */
 const PROP = { pumpkin: 0, grave: 1, tree: 2, leaves: 3, web: 4, hay: 5, chest: 6, bowl: 7 } as const;
+/** Garden sheet cells: the fence, the iron gate, the indoor railing, the locked door. */
+const GARDEN = { fence: 0, gate: 1, railing: 2, door: 3 } as const;
 /** Items sheet cells. */
 const ITEM = { key: 0, heart: 1, candyA: 2, candyB: 3, candyC: 4, chestOpen: 5, lollipop: 6, gate: 7 } as const;
 
@@ -138,7 +140,80 @@ function groundFor(grid: string[][], r: number, c: number): string {
   return near.filter((n) => n === ':').length >= 2 ? ':' : '.';
 }
 
+/**
+ * The painted ground textures (scripts/art-manifest.mjs, `tex.*`) and how many
+ * tiles across one copy covers. They're painted to repeat seamlessly and are
+ * laid from the room's top-left corner, so a lawn or a path runs on unbroken
+ * from tile to tile. Jonathan: "the line drawn pieces just look really flat."
+ */
+const TEXTURES = {
+  grass: { id: 'tex.grass', tiles: 4 },
+  path: { id: 'tex.path', tiles: 5 },
+  hedge: { id: 'tex.hedge', tiles: 3 },
+  boards: { id: 'tex.boards', tiles: 4 },
+  soil: { id: 'tex.soil', tiles: 4 },
+  wallpaper: { id: 'tex.wallpaper', tiles: 4 },
+  siding: { id: 'tex.siding', tiles: 4 },
+} as const;
+type TextureName = keyof typeof TEXTURES;
+const patterns = new Map<string, CanvasPattern>();
+
+/** Fill a rectangle of the room with a painted texture. False if it hasn't loaded (draw the fallback). */
+function fillTexture(ctx: CanvasRenderingContext2D, name: TextureName, x: number, y: number, w: number, h: number): boolean {
+  const t = TEXTURES[name];
+  const image = sprite(t.id);
+  if (!image) return false;
+  let pattern = patterns.get(t.id);
+  if (!pattern) {
+    pattern = ctx.createPattern(image, 'repeat') ?? undefined;
+    if (!pattern) return false;
+    const k = (t.tiles * TILE) / image.width;
+    pattern.setTransform(new DOMMatrix().scale(k, k));
+    patterns.set(t.id, pattern);
+  }
+  const smoothing = ctx.imageSmoothingEnabled;
+  ctx.imageSmoothingEnabled = true;
+  ctx.fillStyle = pattern;
+  ctx.fillRect(x, y, w, h);
+  ctx.imageSmoothingEnabled = smoothing;
+  return true;
+}
+
 function drawGround(ctx: CanvasRenderingContext2D, kind: string, x: number, y: number, r: number, c: number): void {
+  if (theme === 'house' && (kind === '.' || kind === ':' || kind === ',') && fillTexture(ctx, 'boards', x, y, TILE, TILE)) {
+    if (kind === ':') {
+      // A carpet runner where the map has a path.
+      ctx.fillStyle = '#9a2a3a';
+      ctx.fillRect(x + 2, y, TILE - 4, TILE);
+      ctx.fillStyle = alpha('#000000', 0.18);
+      ctx.fillRect(x + 2, y, 1.5, TILE);
+      ctx.fillRect(x + TILE - 3.5, y, 1.5, TILE);
+      ctx.fillStyle = '#c9a23a';
+      ctx.fillRect(x + 4, y, 1, TILE);
+      ctx.fillRect(x + TILE - 5, y, 1, TILE);
+    }
+    return;
+  }
+  if (theme === 'patch' && kind === '.' && fillTexture(ctx, 'soil', x, y, TILE, TILE)) return;
+  if (kind === '.' && fillTexture(ctx, 'grass', x, y, TILE, TILE)) {
+    if (theme === 'graveyard') {
+      // Bluer and darker, with soft mist.
+      ctx.fillStyle = 'rgba(30, 40, 90, 0.35)';
+      ctx.fillRect(x, y, TILE, TILE);
+      ctx.fillStyle = 'rgba(200, 210, 255, 0.07)';
+      ctx.beginPath();
+      ctx.ellipse(x + TILE / 2, y + TILE / 2, TILE * 0.8, TILE * 0.3, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    return;
+  }
+  if (kind === ':' && fillTexture(ctx, 'path', x, y, TILE, TILE)) {
+    // A touch darker and calmer, so the kids and monsters stand out on it.
+    ctx.fillStyle = 'rgba(25, 15, 35, 0.25)';
+    ctx.fillRect(x, y, TILE, TILE);
+    return;
+  }
+  if (kind === ',' && fillTexture(ctx, 'boards', x, y, TILE, TILE)) return;
   if (theme === 'house' && (kind === '.' || kind === ':' || kind === ',')) {
     // Indoors: warm floorboards, and a red carpet runner where the map has a path.
     ctx.fillStyle = (r + c) % 2 ? '#7a4a2a' : '#80502e';
@@ -228,6 +303,29 @@ function drawTile(ctx: CanvasRenderingContext2D, grid: string[][], r: number, c:
   switch (t) {
     case '#':
     case 'W':
+      if (theme === 'house' && fillTexture(ctx, 'wallpaper', x, y, TILE, TILE)) {
+        ctx.fillStyle = '#6e4428';
+        ctx.fillRect(x, y + TILE - 6, TILE, 6);
+        ctx.fillStyle = '#8a5a34';
+        ctx.fillRect(x, y + TILE - 6, TILE, 1.5);
+        return;
+      }
+      if (t === '#' && fillTexture(ctx, 'hedge', x, y, TILE, TILE)) {
+        // A raised hedge: lit along its top edge, and a darker front face where
+        // it meets the ground below (its shadow on the ground is drawn later).
+        if (grid[r - 1]?.[c] !== undefined && grid[r - 1]![c] !== '#') {
+          ctx.fillStyle = 'rgba(200, 230, 210, 0.14)';
+          ctx.fillRect(x, y, TILE, 2);
+        }
+        if (grid[r + 1]?.[c] !== undefined && grid[r + 1]![c] !== '#') {
+          const g = ctx.createLinearGradient(0, y + TILE - 9, 0, y + TILE);
+          g.addColorStop(0, 'rgba(0, 0, 0, 0)');
+          g.addColorStop(1, 'rgba(0, 10, 0, 0.5)');
+          ctx.fillStyle = g;
+          ctx.fillRect(x, y + TILE - 9, TILE, 9);
+        }
+        return;
+      }
       if (theme === 'house') {
         // Indoors: striped wallpaper with a wooden rail.
         ctx.fillStyle = '#4a2a4a';
@@ -255,10 +353,12 @@ function drawTile(ctx: CanvasRenderingContext2D, grid: string[][], r: number, c:
   }
   switch (t) {
     case 'W': {
-      ctx.fillStyle = PALETTE.wall;
-      ctx.fillRect(x, y, TILE, TILE);
-      ctx.fillStyle = PALETTE.wallLight;
-      for (let i = 0; i < 4; i++) ctx.fillRect(x, y + i * 7, TILE, 1);
+      if (!fillTexture(ctx, 'siding', x, y, TILE, TILE)) {
+        ctx.fillStyle = PALETTE.wall;
+        ctx.fillRect(x, y, TILE, TILE);
+        ctx.fillStyle = PALETTE.wallLight;
+        for (let i = 0; i < 4; i++) ctx.fillRect(x, y + i * 7, TILE, 1);
+      }
       // A lit window every few tiles along the bottom row of the house.
       if (r === 1 && c % 4 === 1) {
         ctx.fillStyle = alpha(PALETTE.window, lights ? 0.85 + 0.15 * Math.sin(time * 2 + c) : 0.85);
@@ -270,6 +370,11 @@ function drawTile(ctx: CanvasRenderingContext2D, grid: string[][], r: number, c:
     }
     case 'F': {
       drawGround(ctx, '.', x, y, r, c);
+      const piece = spriteFrames('garden.all')?.[theme === 'house' ? GARDEN.railing : GARDEN.fence];
+      if (piece) {
+        fit(ctx, piece, cx, cy, TILE * 1.08, TILE * 1.08);
+        return;
+      }
       if (theme === 'house') {
         // Indoors a fence is a wooden banister.
         ctx.fillStyle = '#6e4428';
@@ -295,6 +400,20 @@ function drawTile(ctx: CanvasRenderingContext2D, grid: string[][], r: number, c:
     }
     case 'L': {
       drawGround(ctx, ':', x, y, r, c);
+      const piece = spriteFrames('garden.all')?.[theme === 'house' ? GARDEN.door : GARDEN.gate];
+      if (piece) {
+        // A dark backing so the gate reads against a busy path, and a warm glow
+        // on its padlock: this is the thing a key opens.
+        ctx.fillStyle = 'rgba(26, 15, 46, 0.6)';
+        ctx.fillRect(x + 1, y, TILE - 2, TILE);
+        const g = ctx.createRadialGradient(cx, cy + 2, 1, cx, cy + 2, TILE * 0.5);
+        g.addColorStop(0, 'rgba(255, 210, 63, 0.45)');
+        g.addColorStop(1, 'rgba(255, 210, 63, 0)');
+        ctx.fillStyle = g;
+        ctx.fillRect(x, y, TILE, TILE);
+        fit(ctx, piece, cx, cy, TILE * 1.05, TILE * 1.05);
+        return;
+      }
       ctx.fillStyle = PALETTE.gate;
       ctx.fillRect(x + 1, y + 1, TILE - 2, TILE - 2);
       ctx.fillStyle = PALETTE.gateLight;
@@ -523,11 +642,45 @@ function drawRug(ctx: CanvasRenderingContext2D, grid: string[][], r: number, c: 
   }
 }
 
+/**
+ * Depth on top of the flat ground: a raised hedge's shadow falling on the
+ * ground below it, and a soft dark rim on a path where it meets the lawn, so
+ * the path reads as sunk a little into the grass. Only with the painted
+ * textures; the drawn fallback stays as it was.
+ */
+function drawShading(ctx: CanvasRenderingContext2D, grid: string[][], ox: number, oy: number): void {
+  if (!sprite(TEXTURES.grass.id)) return;
+  const outdoors = theme !== 'house';
+  for (let r = 0; r < ROOM_ROWS; r++) {
+    for (let c = 0; c < ROOM_COLS; c++) {
+      const t = grid[r]![c]!;
+      const x = ox + c * TILE;
+      const y = oy + r * TILE;
+      if (outdoors && t !== '#' && grid[r - 1]?.[c] === '#') {
+        const g = ctx.createLinearGradient(0, y, 0, y + 8);
+        g.addColorStop(0, 'rgba(0, 0, 0, 0.35)');
+        g.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = g;
+        ctx.fillRect(x, y, TILE, 8);
+      }
+      if (outdoors && t === ':') {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.22)';
+        const lawn = (n: string | undefined): boolean => n !== undefined && n !== ':' && n !== 'L' && n !== '#';
+        if (lawn(grid[r - 1]?.[c])) ctx.fillRect(x, y, TILE, 2);
+        if (lawn(grid[r + 1]?.[c])) ctx.fillRect(x, y + TILE - 1.5, TILE, 1.5);
+        if (lawn(grid[r]?.[c - 1])) ctx.fillRect(x, y, 2, TILE);
+        if (lawn(grid[r]?.[c + 1])) ctx.fillRect(x + TILE - 1.5, y, 1.5, TILE);
+      }
+    }
+  }
+}
+
 export function drawRoomTiles(ctx: CanvasRenderingContext2D, grid: string[][], ox: number, oy: number, time: number, roomTheme: Theme = 'yard'): void {
   theme = roomTheme;
   for (let r = 0; r < ROOM_ROWS; r++) {
     for (let c = 0; c < ROOM_COLS; c++) drawTile(ctx, grid, r, c, ox + c * TILE, oy + r * TILE, time);
   }
+  drawShading(ctx, grid, ox, oy);
   for (let r = 0; r < ROOM_ROWS; r++) {
     for (let c = 0; c < ROOM_COLS; c++) if (grid[r]![c] === 'R') drawRug(ctx, grid, r, c, ox + c * TILE, oy + r * TILE);
   }
@@ -555,7 +708,7 @@ interface RoomImage {
   key: string;
 }
 const roomImages = new WeakMap<string[][], RoomImage>();
-const SHEETS = ['props.all', 'items.all', 'trees.all', 'yard.all', 'indoor.all'] as const;
+const SHEETS = ['props.all', 'items.all', 'trees.all', 'yard.all', 'indoor.all', 'garden.all'] as const;
 
 function drawRoom(ctx: CanvasRenderingContext2D, grid: string[][], ox: number, oy: number, time: number, roomTheme: Theme = 'yard'): void {
   const m = ctx.getTransform();
@@ -563,6 +716,7 @@ function drawRoom(ctx: CanvasRenderingContext2D, grid: string[][], ox: number, o
   const k = Math.round(Math.hypot(m.a, m.b) * 100) / 100;
   let key = `${roomTheme}|${k}|`;
   for (const sheet of SHEETS) key += spriteFrames(sheet) ? '1' : '0';
+  for (const t of Object.values(TEXTURES)) key += sprite(t.id) ? '1' : '0';
   for (const row of grid) key += row.join('');
   let image = roomImages.get(grid);
   if (!image || image.key !== key) {
@@ -738,7 +892,20 @@ export function drawCat(ctx: CanvasRenderingContext2D, cat: Pick<Cat, 'name' | '
   ctx.fill();
   const hop = cat.pose === 'startled' ? -4 : cat.pose === 'meow' ? -1.5 : 0;
   if (frame) {
-    fit(ctx, frame, x, y - h * 0.2 + hop, h * 1.3, h, cat.fx < 0);
+    // One scale for every frame, taken from the sitting cat, standing on the
+    // ground line. Fitting each frame to the same box made the curled-up purr
+    // (short and wide) blow up to fill it: the cat "grew" when it went to sleep.
+    const sit = poses?.[CAT_POSE.sit];
+    const k = sit ? h / frameBounds(sit).h : h / frameBounds(frame).h;
+    const b = frameBounds(frame);
+    const smoothing = ctx.imageSmoothingEnabled;
+    ctx.imageSmoothingEnabled = true;
+    ctx.save();
+    ctx.translate(x, y + h * 0.3 + hop);
+    if (cat.fx < 0) ctx.scale(-1, 1);
+    ctx.drawImage(frame, -(b.x + b.w / 2) * k, -(b.y + b.h) * k, frame.width * k, frame.height * k);
+    ctx.restore();
+    ctx.imageSmoothingEnabled = smoothing;
     return;
   }
   // Drawn fallback: a little black cat with a coloured collar.

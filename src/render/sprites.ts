@@ -102,6 +102,9 @@ let loaded = false;
  * tuned for a clean PNG leaves a speckled green halo around every character.
  */
 const KEY_TOLERANCE = 96;
+/** How far in from each corner the key colour is sampled, past any border line. */
+const KEY_SAMPLE_INSET = 8;
+
 /** Pixels within this of the edge of the key get a soft alpha, to avoid fringing. */
 const KEY_FEATHER = 56;
 /**
@@ -573,12 +576,16 @@ function cutOutBackground(image: HTMLImageElement): HTMLCanvasElement {
 
   // The key colour is the average of the four corners. Averaging rather than
   // picking one corner survives a model that put a faint gradient in the
-  // background instead of the flat fill it was asked for.
+  // background instead of the flat fill it was asked for. Sampled a few pixels
+  // IN from each corner: Trick or Treat's garden sheet came with a thin dark
+  // line drawn round the whole picture, the corners were that line, and the
+  // "key" came out dark green, so nothing was cut out at all.
+  const m = Math.min(KEY_SAMPLE_INSET, Math.floor(width / 4), Math.floor(height / 4));
   const corners = [
-    0,
-    (width - 1) * 4,
-    (height - 1) * width * 4,
-    ((height - 1) * width + width - 1) * 4,
+    (m * width + m) * 4,
+    (m * width + width - 1 - m) * 4,
+    ((height - 1 - m) * width + m) * 4,
+    ((height - 1 - m) * width + width - 1 - m) * 4,
   ];
   let kr = 0;
   let kg = 0;

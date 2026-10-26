@@ -213,3 +213,27 @@ repainted: a black firefighter coat and trousers with yellow reflective stripes,
 a gold badge, black boots and a red hose. He sprays splashes of water. With this, no costume is a
 placeholder any more. The first paint had five figures in the bottom row (the slicer needs four);
 the second was right.
+
+## 18. Painted ground, and a cat that stopped growing
+
+"When the cat went to sleep it seemed to grow. Odd. Also the line drawn pieces just look really
+flat. I'm sure we could render some better pieces."
+
+- **The cat**: every pose was scaled to fit the same box, so the curled-up purr (short and wide)
+  blew up to fill it. Now every frame uses one scale, taken from the sitting cat, and stands on
+  the same ground line.
+- **The ground is painted**: seven seamless textures (`tex.*`: grass, cobblestone path, hedge
+  leaves, floorboards, pumpkin-patch soil, wallpaper, house siding), tiled from each room's corner
+  so a lawn or path runs on unbroken. Code adds the depth: a hedge is lit along its top, darker on
+  its front face, and casts a shadow on the ground below; a path has a soft dark rim where it meets
+  the lawn and is dimmed a touch so the kids stand out on it. Graveyards are the lawn tinted blue
+  with mist. Every drawn fallback stays for when art hasn't loaded.
+- **Fence, gate, railing and door are painted** (`garden.motion`); a gate sits on a dark backing
+  with a warm glow on its padlock, so it reads as the thing a key opens.
+- **Prompts**: textures get their own style line. With the usual "friendly Halloween night" line,
+  the model painted a whole Halloween scene when asked for a lawn, and sprinkled pumpkins and bats
+  over the hedge. The garden sheet came with a dark line drawn round the whole picture, which the
+  cut-out took for the background colour; the key is now sampled a few pixels in from each corner.
+
+Rooms are still drawn once into an image (decision 11), so none of this costs anything per frame:
+a frame of play measured 0.28 ms on a laptop.

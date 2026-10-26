@@ -15,11 +15,26 @@
     "boss.big-boo",
     "boss.raccula",
     "boom.motion",
+    "tex.grass",
+    "tex.path",
+    "tex.hedge",
+    "tex.boards",
+    "tex.soil",
+    "tex.wallpaper",
+    "tex.siding",
+    "garden.motion",
     "title",
     "night"
   ],
   "ext": "jpg",
   "opaque": [
+    "tex.grass",
+    "tex.path",
+    "tex.hedge",
+    "tex.boards",
+    "tex.soil",
+    "tex.wallpaper",
+    "tex.siding",
     "title",
     "night"
   ],
@@ -133,6 +148,15 @@
       "rowIds": [
         "fx",
         "fx"
+      ]
+    },
+    "garden.motion": {
+      "cols": 4,
+      "rows": 2,
+      "align": "center",
+      "rowIds": [
+        "all",
+        "all"
       ]
     }
   }

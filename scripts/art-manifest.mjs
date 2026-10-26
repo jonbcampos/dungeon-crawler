@@ -43,6 +43,16 @@ const DRAW_STYLE = [
   'lavender and candy pink. No text, no letters, no numbers, no watermark',
 ].join(' ');
 
+/**
+ * Textures get their own style line. With DRAW_STYLE ("a friendly Halloween
+ * night...") the model painted a whole Halloween scene when asked for a lawn.
+ */
+const TEXTURE_STYLE = [
+  "Painted in the soft, slightly cartoony style of a children's picture book, gentle shading, rich",
+  'but muted night-time colours. It is a SURFACE ONLY, like a photo of the ground taken straight down:',
+  'no sky, no buildings, no characters, no scene. No text, no letters, no watermark',
+].join(' ');
+
 const NO_GREEN = 'The subject contains NO green anywhere: no green stems, no grass, no green paint or trim.';
 
 const CUT_OUT = 'clean crisp edges suitable for cutting out against pure green #00FF00.';
@@ -183,6 +193,25 @@ function catSheet(id, collar) {
       'each row, eight in total, the same cat at the same size in every cell. ABSOLUTELY NO WORDS, ' +
       'LABELS OR CAPTIONS anywhere in the picture. ' +
       NO_GREEN,
+  };
+}
+
+/**
+ * A full-bleed square texture for the ground or walls, seen straight from
+ * above, with no objects in it, so it can be tiled.
+ */
+function texture(id, what) {
+  return {
+    id,
+    aspect: '1:1',
+    size: '1K',
+    background: 'none',
+    texture: true,
+    subject:
+      `A seamless tileable texture seen straight from above: ${what}. Even, flat lighting across the whole ` +
+      'image, no single big shape, no objects, no horizon, no vignette, nothing that draws the eye, so ' +
+      'that many copies side by side look like one surface. ONLY that surface: no pumpkins, no candy, ' +
+      'no bats, no moons, no Halloween decorations of any kind scattered on it.',
   };
 }
 
@@ -373,6 +402,42 @@ export const PIECES = [
   },
 
   // --- The world -------------------------------------------------------------------------------
+  // --- The ground ------------------------------------------------------------------
+  // Jonathan: "the line drawn pieces just look really flat. I'm sure we could
+  // render some better pieces." The ground was drawn by code (flat fills and a
+  // few dots) beside painted trees. These are painted textures, tiled by the
+  // renderer (they're painted to repeat seamlessly), plus painted fence and gate
+  // pieces. The renderer adds the depth: hedges raised with a shadow, soft
+  // edges where the path meets the grass.
+  texture('tex.grass', 'a lawn of soft short GREEN grass at night: rich deep green blades with a hint of cool moonlight on the tips, a few tiny clover leaves, NOT purple, NOT blue'),
+  texture('tex.path', 'a garden path of rounded grey-brown cobblestones of different sizes, tightly fitted, with dark mossy gaps between them'),
+  texture('tex.hedge', 'densely packed little rounded dark green boxwood leaves, an even carpet of foliage with soft cool highlights and deep shadows between the leaves'),
+  texture('tex.boards', 'warm brown wooden floorboards running left to right, with a few knots and nail heads'),
+  texture('tex.soil', 'dark brown garden soil in a pumpkin patch, soft earthy clumps with a few curly vine tendrils'),
+  texture('tex.wallpaper', 'old-fashioned plum purple wallpaper with a faint repeating pattern of tiny golden moons and swirls'),
+  texture('tex.siding', 'the wooden clapboard siding of a cosy house at night, horizontal painted boards in dusky purple-grey'),
+
+  {
+    // Two rows of the same four: the model drew two rows when asked for one, so
+    // the sheet asks for what it draws (the second row is spare variants).
+    id: 'garden.motion',
+    aspect: '16:9',
+    size: '2K',
+    sheet: { cols: 4, rows: 2, align: 'center', rowIds: ['all', 'all'] },
+    subject: "EIGHT pieces of a garden and a house for a top-down children's Halloween game, each seen from the front.",
+    cells: [
+      'a short section of white wooden picket fence, three pointed pickets on two cross rails, square and filling the cell.',
+      'a locked black wrought-iron garden gate with curly bars and a big shiny golden padlock in the middle, square and filling the cell.',
+      'a short STRAIGHT LEVEL section of a wooden balcony railing, three turned spindles standing upright under a level polished brown rail, NOT a staircase, square and filling the cell.',
+      'a locked little arched wooden door with iron studs and a big shiny golden padlock, square and filling the cell.',
+      'the same white picket fence section again.',
+      'the same locked wrought-iron gate again.',
+      'the same straight level wooden railing again.',
+      'the same locked arched wooden door again.',
+    ],
+    extra: 'Each piece is drawn straight on, whole, the same size in every cell. ABSOLUTELY NO WORDS. ' + NO_GREEN,
+  },
+
   {
     // Menus. Kids are drawn over it from their own sheets, so it has none.
     id: 'title',
@@ -426,6 +491,9 @@ export function promptFor(piece) {
       'Bold cartoon shapes like a picture book, not realistic. No text, no letters, no watermark.',
       BLACK_BACKGROUND,
     ].join(' ');
+  }
+  if (piece.texture) {
+    return `${piece.subject} ${TEXTURE_STYLE}. It fills the entire square edge to edge, with no border.`;
   }
   if (piece.background === 'none') {
     return `${piece.subject} ${DRAW_STYLE}. This is a full-bleed background image: it must fill the entire frame edge to edge, with no border and no chroma-key colour anywhere.`;
